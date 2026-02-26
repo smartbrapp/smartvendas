@@ -197,7 +197,7 @@ if (fs.existsSync(frontendPath)) {
     app.use(express.static(frontendPath));
 
     // Rota curinga para SPA (tudo que não for API cai no index.html)
-    app.get('*', (req, res, next) => {
+    app.get(/.*/, (req, res, next) => {
         if (req.url.startsWith('/api')) return next();
         res.sendFile(path.join(frontendPath, 'index.html'));
     });
