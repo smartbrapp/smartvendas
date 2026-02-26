@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3333;
@@ -9,9 +12,11 @@ const port = process.env.PORT || 3333;
 app.use(cors());
 app.use(express.json());
 
-// --- CONFIGURAÇÃO CENTRALIZADA (Futuro: Supabase JWT) ---
-const EXTERNAL_API_TOKEN = '8hF4DpG2v3JbT6sQ7kZ5wR1yU0cM9xN8';
-const EXTERNAL_API_BASE = 'https://devseguro.smartbr.app/api/ML';
+// --- CONFIGURAÇÃO CENTRALIZADA (.env Recomendado!) ---
+const EXTERNAL_API_TOKEN = process.env.EXTERNAL_API_TOKEN || '8hF4DpG2v3JbT6sQ7kZ5wR1yU0cM9xN8';
+const EXTERNAL_API_BASE = process.env.EXTERNAL_API_BASE || 'https://devseguro.smartbr.app/api/ML';
+const EXTERNAL_APP_TOKEN = process.env.EXTERNAL_APP_TOKEN || ''; // x-app-token se configurado
+
 
 // --- SISTEMA DE CACHE INDEFINIDO ---
 const globalCache: Record<string, any> = {};
@@ -46,12 +51,15 @@ app.get('/api/proxy/:endpoint', async (req, res) => {
 
     console.log(`[API REAL] Buscando: ${targetUrl.toString()}`);
     try {
+        const headers: any = {
+            'Authorization': `Bearer ${EXTERNAL_API_TOKEN}`,
+            'Accept': 'application/json'
+        };
+        if (EXTERNAL_APP_TOKEN) headers['x-app-token'] = EXTERNAL_APP_TOKEN;
+
         const response = await fetch(targetUrl.toString(), {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${EXTERNAL_API_TOKEN}`,
-                'Accept': 'application/json'
-            }
+            headers
         });
 
         const rawText = await response.text();
@@ -107,9 +115,10 @@ app.get('/api/hierarchy/gerentes', async (req, res) => {
         const url = new URL(`${EXTERNAL_API_BASE}/metafornecedor_cad_gerente`);
         if (COD_CADRCA && COD_CADRCA !== 'null') url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
 
-        const response = await fetch(url.toString(), {
-            headers: { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` }
-        });
+        const headers: any = { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` };
+        if (EXTERNAL_APP_TOKEN) headers['x-app-token'] = EXTERNAL_APP_TOKEN;
+
+        const response = await fetch(url.toString(), { headers });
         const data = await response.json();
         if (!data || !data.data) {
             return res.json([]);
@@ -133,9 +142,10 @@ app.get('/api/hierarchy/supervisors', async (req, res) => {
         if (COD_CADRCA && COD_CADRCA !== 'null') url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
         if (CODGERENTE && CODGERENTE !== 'null') url.searchParams.append('CODGERENTE', CODGERENTE as string);
 
-        const response = await fetch(url.toString(), {
-            headers: { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` }
-        });
+        const headers: any = { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` };
+        if (EXTERNAL_APP_TOKEN) headers['x-app-token'] = EXTERNAL_APP_TOKEN;
+
+        const response = await fetch(url.toString(), { headers });
         const data = await response.json();
         if (!data || !data.data) {
             return res.json([]);
@@ -162,9 +172,10 @@ app.get('/api/hierarchy/vendors/:supervisor_id', async (req, res) => {
         url.searchParams.append('CODSUPERVISOR', supervisor_id);
         if (COD_CADRCA && COD_CADRCA !== 'null') url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
 
-        const response = await fetch(url.toString(), {
-            headers: { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` }
-        });
+        const headers: any = { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` };
+        if (EXTERNAL_APP_TOKEN) headers['x-app-token'] = EXTERNAL_APP_TOKEN;
+
+        const response = await fetch(url.toString(), { headers });
         const data = await response.json();
         if (!data || !data.data) {
             return res.json([]);
