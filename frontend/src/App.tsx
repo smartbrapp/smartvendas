@@ -23,10 +23,11 @@ const App = () => {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   // --- IMPERSONATION / SIMULATION STATE ---
+  // Futuro: Este estado será preenchido pelo payload do JWT após o login.
   const [simulationProfile, setSimulationProfile] = useState<{ id: string | null, name: string, role: UserRole }>({
-    id: '300', // Código de Vendedor Padrão
-    name: 'SERGIO ARTHUR',
-    role: 'vendedor'
+    id: null, // null = Acesso Total (Master)
+    name: 'DIRETORIA',
+    role: 'gerente'
   })
 
   // --- HIERARCHY STATE ---
@@ -364,7 +365,7 @@ const App = () => {
 
       {/* SIMULATION INDICATOR */}
       <AnimatePresence>
-        {simulationProfile.id !== '300' && (
+        {simulationProfile.id !== null && (
           <motion.div initial={{ y: -50 }} animate={{ y: 0 }} exit={{ y: -50 }} className="bg-amber-500 text-black text-[10px] font-black uppercase text-center py-2 sticky top-0 z-[1000] shadow-lg">
             SIMULANDO VISUALIZAÇÃO: {simulationProfile.name} ({simulationProfile.role})
           </motion.div>
@@ -491,7 +492,7 @@ const App = () => {
               </div>
 
               <button
-                onClick={() => setSimulationProfile({ id: '300', name: 'SERGIO ARTHUR (MASTER)', role: 'gerente' })}
+                onClick={() => setSimulationProfile({ id: null, name: 'DIRETORIA', role: 'gerente' })}
                 className="w-full p-6 text-[10px] font-black uppercase tracking-widest border-2 border-slate-500/20 text-slate-500 rounded-[2rem]"
               >
                 Resetar para Visualização Master

@@ -105,7 +105,7 @@ app.get('/api/hierarchy/gerentes', async (req, res) => {
     const { COD_CADRCA } = req.query;
     try {
         const url = new URL(`${EXTERNAL_API_BASE}/metafornecedor_cad_gerente`);
-        if (COD_CADRCA) url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
+        if (COD_CADRCA && COD_CADRCA !== 'null') url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
 
         const response = await fetch(url.toString(), {
             headers: { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` }
@@ -130,8 +130,8 @@ app.get('/api/hierarchy/supervisors', async (req, res) => {
     const { COD_CADRCA, CODGERENTE } = req.query;
     try {
         const url = new URL(`${EXTERNAL_API_BASE}/metafornecedor_cad_supervisor`);
-        if (COD_CADRCA) url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
-        if (CODGERENTE) url.searchParams.append('CODGERENTE', CODGERENTE as string);
+        if (COD_CADRCA && COD_CADRCA !== 'null') url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
+        if (CODGERENTE && CODGERENTE !== 'null') url.searchParams.append('CODGERENTE', CODGERENTE as string);
 
         const response = await fetch(url.toString(), {
             headers: { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` }
@@ -160,7 +160,7 @@ app.get('/api/hierarchy/vendors/:supervisor_id', async (req, res) => {
     try {
         const url = new URL(`${EXTERNAL_API_BASE}/metafornecedor_cad_vendedor`);
         url.searchParams.append('CODSUPERVISOR', supervisor_id);
-        if (COD_CADRCA) url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
+        if (COD_CADRCA && COD_CADRCA !== 'null') url.searchParams.append('COD_CADRCA', COD_CADRCA as string);
 
         const response = await fetch(url.toString(), {
             headers: { 'Authorization': `Bearer ${EXTERNAL_API_TOKEN}` }
