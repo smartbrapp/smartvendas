@@ -517,7 +517,7 @@ const App = () => {
                     <div key={s.id} onClick={() => loadVendorsList(s)} className={`p-7 rounded-[3rem] border-2 flex items-center justify-between cursor-pointer group transition-all hover:scale-[1.02] ${theme === 'dark' ? 'bg-white/[0.02] border-white/5 hover:border-blue-500/30' : 'bg-white border-slate-200 shadow-md'}`}>
                       <div className="flex items-center gap-5">
                         <div className="w-16 h-16 rounded-[2rem] bg-blue-600/10 flex items-center justify-center text-blue-600"><Briefcase size={28} /></div>
-                        <div className="flex flex-col"><span className="text-base font-black uppercase tracking-tight">{s.name}</span><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{s.team} • Cód. {s.id}</span></div>
+                        <div className="flex flex-col"><span className="text-base font-black uppercase tracking-tight">{s.name}</span><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Cód. {s.id}</span></div>
                       </div>
                       <ChevronRight size={20} className="text-slate-400" />
                     </div>
@@ -529,9 +529,9 @@ const App = () => {
             {viewLevel === 'supervisor' && !selectedSupplier && (
               <main className="p-8 space-y-12">
                 <header className="py-6">
-                  <h2 className="text-4xl font-black uppercase tracking-tighter leading-none">{selectedSupervisor?.name}</h2>
+                  <h2 className="text-4xl font-black uppercase tracking-tighter leading-none">Vendedores</h2>
                   <div className="h-1 w-12 bg-emerald-500 rounded-full mt-3" />
-                  <p className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-3">RCA Ativos</p>
+                  <p className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-3">{selectedSupervisor?.name}</p>
                 </header>
                 <div className="space-y-5">
                   {vendorsOfSupervisor.map((v) => (
