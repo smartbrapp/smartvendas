@@ -119,7 +119,9 @@ app.get('/api/hierarchy/gerentes', async (req, res) => {
         if (EXTERNAL_APP_TOKEN) headers['x-app-token'] = EXTERNAL_APP_TOKEN;
 
         const response = await fetch(url.toString(), { headers });
-        const data = await response.json();
+        const rawText = await response.text();
+        const data = JSON.parse(rawText);
+
         if (!data || !data.data) {
             return res.json([]);
         }
@@ -147,7 +149,9 @@ app.get('/api/hierarchy/supervisors', async (req, res) => {
         if (EXTERNAL_APP_TOKEN) headers['x-app-token'] = EXTERNAL_APP_TOKEN;
 
         const response = await fetch(url.toString(), { headers });
-        const data = await response.json();
+        const rawText = await response.text();
+        const data = JSON.parse(rawText);
+
         if (!data || !data.data) {
             return res.json([]);
         }
@@ -160,8 +164,9 @@ app.get('/api/hierarchy/supervisors', async (req, res) => {
             codgerente: s.CODGERENTE
         }));
         res.json(simplified);
-    } catch (e) {
-        res.status(500).json({ error: 'Falha ao buscar supervisores reais' });
+    } catch (e: any) {
+        console.error('[ERROR] Falha ao buscar supervisores:', e.message || e);
+        res.status(500).json({ error: 'Falha ao buscar supervisores reais', details: e.message });
     }
 });
 
@@ -177,7 +182,9 @@ app.get('/api/hierarchy/vendors/:supervisor_id', async (req, res) => {
         if (EXTERNAL_APP_TOKEN) headers['x-app-token'] = EXTERNAL_APP_TOKEN;
 
         const response = await fetch(url.toString(), { headers });
-        const data = await response.json();
+        const rawText = await response.text();
+        const data = JSON.parse(rawText);
+
         if (!data || !data.data) {
             return res.json([]);
         }
@@ -188,8 +195,9 @@ app.get('/api/hierarchy/vendors/:supervisor_id', async (req, res) => {
             value: 0
         }));
         res.json(simplified);
-    } catch (e) {
-        res.status(500).json({ error: 'Falha ao buscar vendedores reais' });
+    } catch (e: any) {
+        console.error('[ERROR] Falha ao buscar vendedores:', e.message || e);
+        res.status(500).json({ error: 'Falha ao buscar vendedores reais', details: e.message });
     }
 });
 
