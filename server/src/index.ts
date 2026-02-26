@@ -130,8 +130,9 @@ app.get('/api/hierarchy/gerentes', async (req, res) => {
             codgerentesuperior: g.CODGERENTESUPERIOR
         }));
         res.json(simplified);
-    } catch (e) {
-        res.status(500).json({ error: 'Falha ao buscar gerentes reais' });
+    } catch (e: any) {
+        console.error('[ERROR] Falha ao buscar gerentes:', e.message || e);
+        res.status(500).json({ error: 'Falha ao buscar gerentes reais', details: e.message });
     }
 });
 
