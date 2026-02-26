@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 
 const app = express();
 const port = process.env.PORT || 3333;
@@ -179,10 +181,38 @@ app.get('/api/hierarchy/vendors/:supervisor_id', async (req, res) => {
     }
 });
 
-app.use((req, res) => {
-    console.warn(`[404] Rota não encontrada: ${req.url}`);
-    res.status(404).json({ error: 'Not Found' });
-});
+// --- SERVINDO O FRONTEND (PWA) ---
+let frontendPath = path.join(__dirname, '../../frontend/dist');
+
+// Fallback caso rodando do root
+if (!fs.existsSync(frontendPath)) {
+    frontendPath = path.join(process.cwd(), 'frontend/dist');
+}
+if (!fs.existsSync(frontendPath)) {
+    frontendPath = path.join(process.cwd(), '../frontend/dist');
+}
+
+if (fs.existsSync(frontendPath)) {
+    console.log(`[SERVE] Módulo PWA ativo! Servindo estáticos de: ${frontendPath}`);
+    app.use(express.static(frontendPath));
+
+    // Rota curinga para SPA (tudo que não for API cai no index.html)
+    app.get('*', (req, res, next) => {
+        if (req.url.startsWith('/api')) return next();
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+} else {
+    console.warn(`[WARN] Frontend não encontrado em: ${frontendPath}`);
+    console.warn(`[DIAGNOSTICS] __dirname: ${__dirname} | cwd: ${process.cwd()}`);
+
+    app.use((req, res) => {
+        if (req.url.startsWith('/api')) {
+            res.status(404).json({ error: 'Endpoint da API não encontrado' });
+            return;
+        }
+        res.status(404).send(`<h2>SmartVendas API Operando.</h2><p>Porém, o painel Front-end (PWA) não foi localizado no servidor. Certifique-se de que o comando 'npm run build' do frontend foi executado e que a pasta 'dist' está acessível.</p>`);
+    });
+}
 
 app.listen(port, () => {
     console.log(`\n🚀 SERVIDOR PROXY SMART: http://localhost:${port}`);
