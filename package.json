@@ -1,0 +1,20 @@
+{
+  "name": "smartvendas",
+  "version": "1.0.0",
+  "description": "> **Gerenciador de Ecossistema e Documentação Inteligente**\r > Status: 🟢 Ativo | Versão: 2.1.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix server\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

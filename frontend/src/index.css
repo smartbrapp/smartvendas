@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3B82F6;
+  --color-secondary: #10B981;
+  --color-dark: #0F172A;
+  --color-surface: #1E293B;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  font-family: var(--font-sans);
+  transition: background-color 0.5s ease;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  * {
+    @apply border-gray-800;
+  }
+}
+
+/* Custom styles for the app */
+.glass-panel {
+  @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+}
+
+.metric-circle {
+  @apply w-24 h-24 rounded-full border-4 border-gray-800 flex flex-col items-center justify-center relative overflow-hidden;
+}
+
+.metric-circle::before {
+  content: '';
+  @apply absolute inset-0 bg-primary/10 transition-all duration-500;
+  height: var(--percent, 0%);
+  top: auto;
+}
+
+.badge-vendedor {
+  @apply bg-[#111827] text-white px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.status-bom {
+  @apply bg-green-900/30 text-green-400 px-3 py-1 rounded-full text-xs font-semibold border border-green-900/50;
+}
+
+.equipe-capital {
+  @apply bg-blue-900/30 text-blue-400 px-3 py-1 rounded-full text-xs font-semibold border border-blue-900/50;
+}
