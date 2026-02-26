@@ -58,7 +58,31 @@ const App = () => {
   // --- CACHE STATE ---
   const [cachedData, setCachedData] = useState<Record<string, any>>({})
 
-  const formatBRL = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+  // --- HARDWARE BACK BUTTON (ANDROID PWA) ---
+  useEffect(() => {
+    const handlePopState = () => {
+      if (expandedClientId !== null || expandedProductId !== null) {
+        setExpandedClientId(null); setExpandedProductId(null);
+      } else if (selectedSupplier) {
+        setSelectedSupplier(null); setAnalysisData(null); setPerspective(null);
+      } else if (viewLevel === 'vendedor' && simulationProfile.role !== 'vendedor') {
+        setViewLevel('supervisor'); setSelectedVendedorId(null);
+      } else if (viewLevel === 'supervisor' && simulationProfile.role !== 'supervisor') {
+        setViewLevel('gerente'); setSelectedSupervisor(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [expandedClientId, expandedProductId, selectedSupplier, viewLevel, simulationProfile.role]);
+
+  const pushHistory = () => { window.history.pushState({ pwaLayer: true }, '', ''); };
+
+  const safeNumber = (v: any) => {
+    let num = Number(v);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const formatBRL = (v: any) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(safeNumber(v));
 
   const formatDate = (dateStr: string) => {
     if (!dateStr || dateStr === 'N/A') return 'N/A';
@@ -228,6 +252,7 @@ const App = () => {
   }
 
   const loadVendorsList = async (sup: any) => {
+    pushHistory();
     setLoading(true);
     setVendorsOfSupervisor([]); // Clear old list immediately
     try {
@@ -241,6 +266,7 @@ const App = () => {
   }
 
   const openSupplierAnalysis = async (sup: any, forceRefresh = false) => {
+    if (!forceRefresh) pushHistory();
     setLoading(true);
     setAnalysisData(null); // CLEAR OLD DATA
     setExpandedClientId(null); setExpandedProductId(null);
@@ -283,6 +309,7 @@ const App = () => {
   const loadClientItems = async (clientId: number, forceRefresh = false) => {
     if (!forceRefresh && expandedClientId === clientId) { setExpandedClientId(null); return; }
     if (!forceRefresh && clientItems[clientId]) { setExpandedClientId(clientId); return; }
+    if (!forceRefresh) pushHistory();
     setLoadingItemsId(clientId);
     const rca = selectedVendedorId || (simulationProfile.role === 'vendedor' ? simulationProfile.id : '300');
     try {
@@ -299,6 +326,7 @@ const App = () => {
   const loadProductPrices = async (productId: number, forceRefresh = false) => {
     if (!forceRefresh && expandedProductId === productId) { setExpandedProductId(null); return; }
     if (!forceRefresh && productPrices[productId]) { setExpandedProductId(productId); return; }
+    if (!forceRefresh) pushHistory();
     setLoadingItemsId(productId);
     try {
       const rf = forceRefresh ? '&refresh=true' : '';
@@ -581,7 +609,7 @@ const App = () => {
                                 cx="50%" cy="50%" r="44%" fill="transparent" stroke="currentColor" strokeWidth="6"
                                 strokeDasharray="276.46"
                                 initial={{ strokeDashoffset: 276.46 }}
-                                animate={{ strokeDashoffset: 276.46 * (1 - Math.min((perc || 0) / 100, 1)) }}
+                                animate={{ strokeDashoffset: 276.46 * (1 - Math.min(safeNumber(perc) / 100, 1)) }}
                                 strokeLinecap="round"
                                 className={tab === 'valor' ? 'text-blue-600' : tab === 'positivacao' ? 'text-emerald-500' : 'text-amber-500'}
                               />
@@ -664,17 +692,17 @@ const App = () => {
                                     {perspective === 'valor' ? 'Venda' : perspective === 'positivacao' ? 'Positivação' : 'Mix'}
                                   </span>
                                   <span className="text-2xl font-black block text-blue-600 leading-none">
-                                    {perspective === 'valor' ? formatBRL(s.valor).replace('R$', '').trim() : perspective === 'positivacao' ? s.positivados : s.mix}
+                                    {perspective === 'valor' ? formatBRL(s.valor).replace('R$', '').trim() : perspective === 'positivacao' ? safeNumber(s.positivados) : safeNumber(s.mix)}
                                   </span>
                                 </div>
                                 <span className="text-lg font-black text-blue-500/50">
-                                  {Math.round(perspective === 'valor' ? s.perc_venda : perspective === 'positivacao' ? s.perc_pos : s.perc_mix)}%
+                                  {Math.round(safeNumber(perspective === 'valor' ? s.perc_venda : perspective === 'positivacao' ? s.perc_pos : s.perc_mix))}%
                                 </span>
                               </div>
                               <div className={`h-2.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-black/40' : 'bg-slate-100'}`}>
                                 <motion.div
                                   initial={{ width: 0 }}
-                                  animate={{ width: `${Math.min((perspective === 'valor' ? s.perc_venda : perspective === 'positivacao' ? s.perc_pos : s.perc_mix) ?? 0, 100)}%` }}
+                                  animate={{ width: `${Math.max(0, Math.min(safeNumber(perspective === 'valor' ? s.perc_venda : perspective === 'positivacao' ? s.perc_pos : s.perc_mix), 100))}%` }}
                                   className="h-full bg-blue-600 shadow-lg shadow-blue-600/40"
                                 />
                               </div>
@@ -714,10 +742,10 @@ const App = () => {
                     <div className="relative w-28 h-28 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90">
                         <circle cx="56" cy="56" r="48" fill="transparent" stroke="currentColor" strokeWidth="10" className="text-blue-600/10" />
-                        <circle cx="56" cy="56" r="48" fill="transparent" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeDasharray="301.6" strokeDashoffset={301.6 * (1 - ((perspective === 'valor' || !perspective ? (selectedSupplier.perc_venda ?? 0) : perspective === 'positivacao' ? (selectedSupplier.perc_pos ?? 0) : (selectedSupplier.perc_mix ?? 0)) / 100))} className="text-blue-600 filter drop-shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
+                        <circle cx="56" cy="56" r="48" fill="transparent" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeDasharray="301.6" strokeDashoffset={301.6 * (1 - (safeNumber(perspective === 'valor' || !perspective ? selectedSupplier.perc_venda : perspective === 'positivacao' ? selectedSupplier.perc_pos : selectedSupplier.perc_mix) / 100))} className="text-blue-600 filter drop-shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-lg font-black text-blue-600 leading-none">{(perspective === 'valor' || !perspective ? (selectedSupplier.perc_venda ?? 0) : perspective === 'positivacao' ? (selectedSupplier.perc_pos ?? 0) : (selectedSupplier.perc_mix ?? 0))}%</span>
+                        <span className="text-lg font-black text-blue-600 leading-none">{safeNumber(perspective === 'valor' || !perspective ? selectedSupplier.perc_venda : perspective === 'positivacao' ? selectedSupplier.perc_pos : selectedSupplier.perc_mix)}%</span>
                       </div>
                     </div>
                   </div>
