@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
 import vendorProfile from './assets/vendor_profile.png'
 
-const API_BASE_URL = 'http://localhost:3333/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api';
 
 // --- TIPOS ---
 type UserRole = 'gerente' | 'supervisor' | 'vendedor';
